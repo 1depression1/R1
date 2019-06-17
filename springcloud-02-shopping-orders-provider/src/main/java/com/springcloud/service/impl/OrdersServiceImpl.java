@@ -1,0 +1,54 @@
+package com.springcloud.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.springcloud.common.PageUtils;
+import com.springcloud.dao.OrdersMapper;
+import com.springcloud.entity.Orders;
+import com.springcloud.service.OrdersService;
+
+@Service
+public class OrdersServiceImpl implements OrdersService {
+
+	@Autowired
+	private OrdersMapper ordersMapper;
+
+	@Override
+	public PageInfo<Orders> selectOrders(Orders orders, Integer pageNumber) {
+		if (orders.getUser() != null) {
+			// 为用户名两端加%
+			orders.getUser().setUserName("%" + orders.getUser().getUserName() + "%");
+		}
+
+		// 设置分页的信息
+		PageHelper.startPage(pageNumber + 1, PageUtils.PAGE_ROW_COUNT);
+
+		List<Orders> list = this.ordersMapper.selectOrders(orders);
+
+		return new PageInfo<>(list);
+	}
+
+	@Transactional
+	@Override
+	public Integer updateOrderStatus(Orders orders) {
+		return this.ordersMapper.updateOrderStatus(orders);
+	}
+
+	/**
+	 * 查询指定日期范围内的销售额
+	 * 
+	 * @param orders 查询条件
+	 * @return 成功返回java.util.List类型的实例，否则返回null
+	 */
+	@Override
+	public List<Orders> selectGroup(Orders orders) {
+		return this.ordersMapper.selectGroup(orders);
+	}
+
+}
